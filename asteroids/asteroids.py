@@ -189,6 +189,9 @@ class Asteroid:
    
   def __init__(self, pos):
     self.pos = pos
+    
+  def get_position_int(self):
+    return [int(self.pos[0]), int(self.pos[1])]
 
 # Initialize pygame screen    
 pygame.init()
@@ -208,6 +211,11 @@ s = Ship([width/2, height/2])
 s.set_screen(size)
 # Initial empty bullet list
 bullets = []
+# Asteroids list
+asteroids = []
+# Create an asteroid
+for i in range(10):
+  asteroids.append(Asteroid([random.randint(30, 469), random.randint(30, 469)]))
 
 while 1:
   for event in pygame.event.get():
@@ -255,9 +263,25 @@ while 1:
     if b.age > MAX_AGE:
       bullets.remove(b)
     pygame.draw.circle(screen, white, b.get_position_int(), 3)
+  # Handle each asteroid
+  for a in asteroids:
+    # Create rect for asteroid
+    a_rect = pygame.Rect(0, 0, 0, 0)
+    a_rect.center = a.get_position_int()
+    a_rect.width = 30
+    a_rect.height = 30
+    hit = False
+    # Check for collision with bullets
+    for b in bullets:
+      if a_rect.collidepoint(b.pos):
+        hit = True
+        asteroids.remove(a)
+        bullets.remove(b)
+    # Draw asteroids
+    if not hit:
+      pygame.draw.rect(screen, red, a_rect)
+    
   pygame.display.flip() # Update displayed frame
-  
-  print len(bullets)
   
   # Control game speed
   time.sleep(.01)
