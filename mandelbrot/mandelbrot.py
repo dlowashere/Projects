@@ -63,28 +63,26 @@ def mandelbrot(x0, y0):
   if iteration == MAX_ITERATION:
     return in_set # red
   else:
-    # Gray scale version
-    gray = int(math.log(iteration)*255/math.log(MAX_ITERATION))
-    return (gray, gray, gray)
-    iteration = int(math.log(iteration)*360/math.log(MAX_ITERATION))
-    # Color version
-    #c = pygame.Color(1,1,1,1)
-    #c.hsva = (iteration, 100, 100, 100)
-    #return c
-    
-  
-if __name__ == "__main__":
-  # Initialize pygame screen    
-  pygame.init()
-  size = width, height = 1400, 800
-  # Screen Surface
-  screen = pygame.display.set_mode(size)
-  
-  # Create pixel array to access surface as array
-  pxarray = pygame.PixelArray(screen)
-  # coords of Mandelbrot to view
-  viewx = (-2.5, 1.0)
-  viewy = (-1.0, 1.0)
+    GRAYSCALE = False
+    if GRAYSCALE:
+      # Gray scale version
+      gray = int(math.log(iteration)*255/math.log(MAX_ITERATION))
+      return (gray, gray, gray)
+    else:
+      # Color version
+      iteration = int(math.log(iteration)*360/math.log(MAX_ITERATION))
+      c = pygame.Color(1,1,1,1)
+      c.hsva = (iteration, 100, 100, 100)
+      return c
+
+def display_mandelbrot(viewx, viewy, size, pxarray, display):
+  """
+  Displays Mandelbrot set to display by writing to the pixel array of the
+  screen (pxarray). The set is displayed from x coords of viewx[0] to viewx[1]
+  and y coords of viewy[0] to viewy[1]. size is the size of the pygame window.
+  """
+  print viewx, viewy
+  width, height = size
   for x in range(width):
     for y in range(height):
       # Scale x between [-2.5, 1] and y to be between [-1, 1]
@@ -92,8 +90,22 @@ if __name__ == "__main__":
       yscaled = (viewy[1]-viewy[0])*y/height + viewy[0]
       pxarray[x][y] = mandelbrot(xscaled, yscaled) # Calculate mandelbrot
     if x%10 == 0:
-      print x
-  pygame.display.flip() # Update display
+      display.flip() # Update display
+  
+if __name__ == "__main__":
+  # Initialize pygame screen    
+  pygame.init()
+  size = width, height = 700, 400
+  # Screen Surface
+  screen = pygame.display.set_mode(size)
+  
+  # Create pixel array to access surface as array
+  pxarray = pygame.PixelArray(screen)
+  # coords of Mandelbrot to view
+  viewx = [-2.5, 1.0]
+  viewy = [-1.0, 1.0]
+  # Display initial mandelbrot
+  display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
   
   # Main loop
   while(True):
@@ -104,6 +116,49 @@ if __name__ == "__main__":
         # Esc -> exit
         if event.key == pygame.K_ESCAPE:
           sys.exit()
+        elif event.key == pygame.K_z:
+          # Zoom in by 2x
+          viewx[0] /= 2
+          viewx[1] /= 2
+          viewy[0] /= 2
+          viewy[1] /= 2
+          display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
+        elif event.key == pygame.K_r:
+          # Reset view
+          viewx = [-2.5, 1.0]
+          viewy = [-1.0, 1.0]
+          display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
+        elif event.key == pygame.K_x:
+          # Zoom out by 2x
+          viewx[0] *= 2
+          viewx[1] *= 2
+          viewy[0] *= 2
+          viewy[1] *= 2
+          display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
+        elif event.key == pygame.K_LEFT:
+          # Shift left by half a screen
+          width = viewx[1] - viewx[0]
+          viewx[0] -= width/2
+          viewx[1] -= width/2
+          display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
+        elif event.key == pygame.K_RIGHT:
+          # Shift right by half a screen
+          width = viewx[1] - viewx[0]
+          viewx[0] += width/2
+          viewx[1] += width/2
+          display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
+        elif event.key == pygame.K_UP:
+          # Shift up by half a screen
+          height = viewy[1] - viewy[0]
+          viewy[0] -= height/2
+          viewy[1] -= height/2
+          display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
+        elif event.key == pygame.K_DOWN:
+          # Shift up by half a screen
+          height = viewy[1] - viewy[0]
+          viewy[0] += height/2
+          viewy[1] += height/2
+          display_mandelbrot(viewx, viewy, size, pxarray, pygame.display)
       # Quit
       if event.type == pygame.QUIT:
         sys.exit()
