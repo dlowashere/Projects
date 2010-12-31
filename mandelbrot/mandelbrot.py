@@ -162,5 +162,4 @@ if __name__ == "__main__":
       # Quit
       if event.type == pygame.QUIT:
         sys.exit()
-    pygame.display.flip()
     
